@@ -1,4 +1,4 @@
-# $Id: TypeKey.pm,v 1.5 2004/06/20 13:23:46 btrott Exp $
+# $Id: TypeKey.pm,v 1.7 2004/07/29 16:20:06 btrott Exp $
 
 package Authen::TypeKey;
 use strict;
@@ -12,7 +12,7 @@ use LWP::UserAgent;
 use HTTP::Status qw( RC_NOT_MODIFIED );
 
 use vars qw( $ERROR $VERSION );
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub new {
     my $class = shift;
@@ -20,6 +20,8 @@ sub new {
     $tk->skip_expiry_check(0);
     $tk->expires(600);
     $tk->key_url('http://www.typekey.com/extras/regkeys.txt');
+    $tk->version(1.1);
+    $tk->token('');
     $tk;
 }
 
@@ -34,6 +36,8 @@ sub key_cache         { shift->_var('key_cache',         @_) }
 sub skip_expiry_check { shift->_var('skip_expiry_check', @_) }
 sub expires           { shift->_var('expires',           @_) }
 sub key_url           { shift->_var('key_url',           @_) }
+sub token             { shift->_var('token',             @_) }
+sub version           { shift->_var('version',           @_) }
 
 sub verify {
     my $tk = shift;
@@ -56,7 +60,8 @@ sub verify {
     $sig = Crypt::DSA::Signature->new;
     $sig->r(bin2mp(decode_base64($r)));
     $sig->s(bin2mp(decode_base64($s)));
-    my $msg = join '::', $email, $username, $name, $ts;
+    my $msg = join '::', $email, $username, $name, $ts,
+        $tk->version >= 1.1 ? ($tk->token) : ();
     my $dsa = Crypt::DSA->new;
     unless ($dsa->verify( Message => $msg, Key => $key, Signature => $sig )) {
         return $tk->error("TypeKey signature verification failed");
@@ -121,6 +126,7 @@ Authen::TypeKey - TypeKey authentication verification
     use Authen::TypeKey;
     my $q = CGI->new;
     my $tk = Authen::TypeKey->new;
+    $tk->token('typekey-token');
     my $res = $tk->verify($q) or die $tk->errstr;
 
 =head1 DESCRIPTION
@@ -135,6 +141,14 @@ I<http://www.movabletype.org/docs/tk-apps.html>.
 =head2 Authen::TypeKey->new
 
 Create a new I<Authen::TypeKey> object.
+
+=head2 $tk->token([ $typekey_token ])
+
+Your TypeKey token, which you passed to TypeKey when creating the original
+sign-in link. This is required to successfully validate the signature in
+TypeKey 1.1 and higher, which includes the token in the plaintext.
+
+This must be set B<before> calling I<verify>.
 
 =head2 $tk->verify($query)
 
@@ -193,6 +207,11 @@ The default value is 600 seconds, i.e. 10 minutes.
 
 Get/set the URL from which the TypeKey public key can be obtained. The
 default URL is I<http://www.typekey.com/extras/regkeys.txt>.
+
+=head2 $tk->version([ $version ])
+
+Get/set the version of the TypeKey protocol to use. The default version
+if C<1.1>.
 
 =head1 LICENSE
 

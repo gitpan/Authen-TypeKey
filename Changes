@@ -1,2 +1,6 @@
+0.02  2004.07.29
+    - Added support for TypeKey 1.1 protocol.
+    - Added $tk->token and $tk->version settings.
+
 0.01  2004.06.20
     - Initial distribution.

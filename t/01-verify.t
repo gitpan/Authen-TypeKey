@@ -1,20 +1,25 @@
-# $Id: 01-verify.t,v 1.3 2004/06/20 12:09:33 btrott Exp $
+# $Id: 01-verify.t,v 1.4 2004/07/29 16:09:29 btrott Exp $
 
 use Test;
 use Authen::TypeKey;
 
-BEGIN { plan tests => 17 }
+BEGIN { plan tests => 19 }
 
 my $q = My::Query->new({
-    ts => '1087419162',
+    ts => '1091163746',
     email => 'bentwo@stupidfool.org',
     name => 'Melody',
     nick => 'foobar baz',
-    sig => 'BoNGFN8Bi9t9GEYVbZ2PKWg6iqI=:X9MAGdqWtTrKT5OGMiM8TWoaQfo=',
+    sig => 'GWwAIXbkb2xNrQO2e/r2LDl14ek=:U5+tDsPM0+EXeKzFWsosizG7+VU=',
 });
 
 my $tk = Authen::TypeKey->new;
 ok($tk);
+
+ok($tk->version, 1.1);
+
+$tk->token('foo');
+ok($tk->token, 'foo');
 
 my $res = $tk->verify($q);
 ok(!$res);

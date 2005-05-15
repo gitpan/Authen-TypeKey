@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.3 2004/06/20 13:23:46 btrott Exp $
+# $Id: Makefile.PL 1821 2005-05-15 20:15:02Z btrott $
 
 use inc::Module::Install;
 
@@ -12,8 +12,10 @@ sign(1);
 
 include('ExtUtils::AutoInstall');
 
-requires('Crypt::DSA');
+requires('Class::ErrorHandler');
+requires('Math::BigInt');
 requires('MIME::Base64');
+requires('Digest::SHA1');
 requires('LWP');
 
 auto_include();

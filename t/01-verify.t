@@ -1,4 +1,4 @@
-# $Id: 01-verify.t,v 1.4 2004/07/29 16:09:29 btrott Exp $
+# $Id: 01-verify.t 30 2004-07-29 16:09:29Z btrott $
 
 use Test;
 use Authen::TypeKey;

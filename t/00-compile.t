@@ -1,8 +1,4 @@
-# $Id: 00-compile.t 27 2004-06-20 12:09:33Z btrott $
+# $Id: 00-compile.t 1845 2005-05-27 18:41:32Z btrott $
 
-my $loaded;
-BEGIN { print "1..1\n" }
-use Authen::TypeKey;
-$loaded++;
-print "ok 1\n";
-END { print "not ok 1\n" unless $loaded }
+use Test::More tests => 1;
+BEGIN { use_ok('Authen::TypeKey') }

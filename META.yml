@@ -1,5 +1,5 @@
 name: Authen-TypeKey
-version: 0.03
+version: 0.04
 abstract: TypeKey Authentication
 author: Six Apart <cpan@sixapart.com>
 license: perl

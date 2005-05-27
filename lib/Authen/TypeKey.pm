@@ -1,4 +1,4 @@
-# $Id: TypeKey.pm 1825 2005-05-15 22:11:35Z btrott $
+# $Id: TypeKey.pm 1845 2005-05-27 18:41:32Z btrott $
 
 package Authen::TypeKey;
 use strict;
@@ -10,7 +10,7 @@ use Digest::SHA1 qw( sha1 );
 use LWP::UserAgent;
 use HTTP::Status qw( RC_NOT_MODIFIED );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
     my $class = shift;
@@ -43,22 +43,27 @@ sub verify {
     my($email, $username, $name, $ts, $sig);
     if (@_ == 1) {
         my $q = $_[0];
-        ($email, $username, $name, $ts, $sig) = map $q->param($_),
-            qw( email name nick ts sig );
-        for ($email, $sig) {
-            tr/ /+/;
+        if (ref $q eq 'HASH') {
+            ($email, $username, $name, $ts, $sig) = map $_[0]->{$_},
+                qw( email name nick ts sig );
+        } else {
+            ($email, $username, $name, $ts, $sig) = map $q->param($_),
+                qw( email name nick ts sig );
         }
     } else {
         ## Later we could process arguments passed in a hash.
         return $tk->error("usage: verify(\$query)");
+    }
+    for ($email, $sig) {
+        tr/ /+/;
     }
     return $tk->error("TypeKey data has expired")
         unless $tk->skip_expiry_check || $ts + $tk->expires >= time;
     my $key = $tk->_fetch_key($tk->key_url) or return;
     my($r, $s) = split /:/, $sig;
     $sig = {};
-    $sig->{r} = Math::BigInt->new("0b" . unpack("B160", decode_base64($r)));
-    $sig->{s} = Math::BigInt->new("0b" . unpack("B160", decode_base64($s)));
+    $sig->{r} = Math::BigInt->new("0b" . unpack("B*", decode_base64($r)));
+    $sig->{s} = Math::BigInt->new("0b" . unpack("B*", decode_base64($s)));
     my $msg = join '::', $email, $username, $name, $ts,
         $tk->version >= 1.1 ? ($tk->token) : ();
     unless ($tk->_verify($msg, $key, $sig)) {
@@ -73,7 +78,7 @@ sub verify {
 sub _verify {
     my $tk = shift;
     my($msg, $key, $sig) = @_;
-    my $u1 = Math::BigInt->new("0b" . unpack("B160", sha1($msg)));
+    my $u1 = Math::BigInt->new("0b" . unpack("B*", sha1($msg)));
     $sig->{s}->bmodinv($key->{q});
     $u1 = ($u1 * $sig->{s}) % $key->{q};
     $sig->{s} = ($sig->{r} * $sig->{s}) % $key->{q};
@@ -157,8 +162,8 @@ This must be set B<before> calling I<verify>.
 
 Verify a TypeKey signature based on the other parameters given. The signature
 and other parameters are found in the I<$query> object, which should be
-any object that supports a I<param> method--for example, a I<CGI> or
-I<Apache::Request> object.
+either a hash reference, or any object that supports a I<param> method--for
+example, a I<CGI> or I<Apache::Request> object.
 
 If the signature is successfully verified, I<verify> returns a reference to
 a hash containing the following values.

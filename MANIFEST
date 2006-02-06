@@ -19,3 +19,4 @@ META.yml
 README
 t/00-compile.t
 t/01-verify.t
+t/02-invalid-sig.t

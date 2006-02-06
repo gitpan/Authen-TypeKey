@@ -1,6 +1,11 @@
-$Id: Changes 1845 2005-05-27 18:41:32Z btrott $
+$Id: Changes 1915 2006-02-06 06:26:33Z btrott $
 
 Revision history for Authen::TypeKey
+
+0.05  2006.02.05
+    - Fixed a validation bug where verify would incorrectly return a true
+      result for an invalid signature like "foo". Thanks to Tatsuhiko
+      Miyagawa for the spot and test case.
 
 0.04  2005.05.27
     - Use 'B*' in unpack, rather than 'B160'.

@@ -1,4 +1,4 @@
-# $Id: TypeKey.pm 1845 2005-05-27 18:41:32Z btrott $
+# $Id: TypeKey.pm 1915 2006-02-06 06:26:33Z btrott $
 
 package Authen::TypeKey;
 use strict;
@@ -10,7 +10,7 @@ use Digest::SHA1 qw( sha1 );
 use LWP::UserAgent;
 use HTTP::Status qw( RC_NOT_MODIFIED );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub new {
     my $class = shift;
@@ -61,6 +61,7 @@ sub verify {
         unless $tk->skip_expiry_check || $ts + $tk->expires >= time;
     my $key = $tk->_fetch_key($tk->key_url) or return;
     my($r, $s) = split /:/, $sig;
+    return $tk->error("Invalid signature $sig") unless $r && $s;
     $sig = {};
     $sig->{r} = Math::BigInt->new("0b" . unpack("B*", decode_base64($r)));
     $sig->{s} = Math::BigInt->new("0b" . unpack("B*", decode_base64($s)));
